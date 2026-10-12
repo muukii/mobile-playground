@@ -1,7 +1,7 @@
 # Android Playground
 
-A standalone Kotlin / Jetpack Compose playground, alongside `apple-playground`.
-Open this directory as a project in Android Studio and run the `app` configuration.
+The Kotlin / Jetpack Compose app in `mobile-playground`.
+Open this `android/` directory as a project in Android Studio and run the `app` configuration.
 The app starts with a sample catalog. Each card opens an independent experiment;
 the toolbar back button or Android's system Back returns to the catalog.
 
