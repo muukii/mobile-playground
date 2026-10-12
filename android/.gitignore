@@ -1,0 +1,35 @@
+# Gradle, Kotlin, and compiler output
+.gradle/
+.kotlin/
+**/build/
+out/
+
+# Android Studio and machine-specific SDK configuration
+.idea/
+*.iml
+*.ipr
+*.iws
+local.properties
+
+# Native build intermediates
+.externalNativeBuild/
+.cxx/
+
+# Packaged applications and runtime diagnostics
+*.apk
+*.aab
+*.ap_
+*.dex
+*.hprof
+*.log
+captures/
+
+# Local signing configuration and private keystores
+keystore.properties
+key.properties
+*.jks
+*.keystore
+
+# Operating-system metadata
+.DS_Store
+Thumbs.db
