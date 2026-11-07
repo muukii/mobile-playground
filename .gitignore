@@ -1,3 +1,9 @@
 # Operating-system metadata shared by all playgrounds
 .DS_Store
 Thumbs.db
+
+# Machine-local mise overrides
+/mise.local.toml
+/mise.*.local.toml
+/.mise.local.toml
+/.mise.*.local.toml

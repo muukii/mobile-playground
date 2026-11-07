@@ -50,10 +50,16 @@ Open `flutter/` as the project directory in an IDE with Flutter support.
 The app starts with a catalog of Flutter experiments and runs on iOS and Android.
 
 ```sh
-cd flutter
-flutter pub get
-flutter run -d <device-id>
+mise trust
+mise run flutter:setup
+mise run flutter:devices
+mise run flutter:run -d <device-id>
 ```
+
+Install [mise](https://mise.jdx.dev/getting-started.html) first. The root
+`mise.toml` pins Flutter, so a separate Flutter or Dart installation is not
+required. On macOS, `mise run flutter:setup-ios` also checks Xcode and caches the
+iOS artifacts. Xcode / Simulator runtimes and Android SDK setup remain manual.
 
 See [the Flutter README](flutter/README.md) for SDK setup, sample registration,
 and verification commands. Its `ios/` and `android/` host projects are independent

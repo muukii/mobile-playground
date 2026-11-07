@@ -1,0 +1,46 @@
+[tools]
+flutter = "3.47.9"
+
+[tasks."flutter:setup"]
+description = "Install the pinned Flutter SDK and fetch app dependencies"
+dir = "{{config_root}}/flutter"
+run = "flutter pub get"
+
+[tasks."flutter:setup-ios"]
+description = "Check Xcode and cache Flutter artifacts for iOS (macOS)"
+depends = ["flutter:setup"]
+dir = "{{config_root}}/flutter"
+run = ["xcodebuild -version", "flutter precache --ios"]
+
+[tasks."flutter:doctor"]
+description = "Check Flutter and native platform prerequisites"
+dir = "{{config_root}}/flutter"
+run = "flutter doctor -v"
+
+[tasks."flutter:devices"]
+description = "List available Flutter devices"
+dir = "{{config_root}}/flutter"
+run = "flutter devices"
+
+[tasks."flutter:run"]
+description = "Run the playground; pass -d <device-id> to select a device"
+depends = ["flutter:setup"]
+dir = "{{config_root}}/flutter"
+raw = true
+run = "flutter run"
+
+[tasks."flutter:check"]
+description = "Check formatting, analyze Dart, and run widget tests"
+depends = ["flutter:setup"]
+dir = "{{config_root}}/flutter"
+run = [
+  "dart format --output=none --set-exit-if-changed lib test",
+  "flutter analyze",
+  "flutter test",
+]
+
+[tasks."flutter:build-ios"]
+description = "Build the debug app for iOS Simulator (macOS)"
+depends = ["flutter:setup-ios"]
+dir = "{{config_root}}/flutter"
+run = "flutter build ios --simulator --debug"
