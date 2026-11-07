@@ -5,12 +5,15 @@ import 'package:flutter_playground/samples.dart';
 
 Future<void> openSample(WidgetTester tester, String id) async {
   final entry = find.byKey(ValueKey('sample-$id'));
+  await tester.scrollUntilVisible(entry, 200);
   await tester.ensureVisible(entry);
+  await tester.pumpAndSettle();
   await tester.tap(entry);
   await tester.pumpAndSettle();
 }
 
 void main() {
+  WidgetController.hitTestWarningShouldBeFatal = true;
   test('sample IDs are unique and stable route components', () {
     final ids = playgroundSamples.map((sample) => sample.id).toList();
     expect(ids.toSet().length, ids.length);
@@ -110,8 +113,9 @@ void main() {
         case 'scrim':
           await tester.tapAt(const Offset(16, 100));
         case 'drag':
-          await tester.fling(
-            find.text('Modal bottom sheet'),
+          final sheet = tester.getRect(find.byType(BottomSheet));
+          await tester.flingFrom(
+            sheet.topCenter + const Offset(0, 16),
             const Offset(0, 400),
             1000,
           );
@@ -119,7 +123,7 @@ void main() {
           await tester.binding.handlePopRoute();
       }
       await tester.pumpAndSettle();
-      expect(find.text('Modal bottom sheet'), findsNothing);
+      expect(find.text('Modal bottom sheet'), findsNothing, reason: dismissal);
       expect(find.text('Open sheet'), findsOneWidget);
     }
   });
@@ -150,6 +154,7 @@ void main() {
       200,
       scrollable: content,
     );
+    await tester.pumpAndSettle();
     expect(find.text('Item 20').hitTestable(), findsOneWidget);
     await tester.binding.handlePopRoute();
     await tester.pumpAndSettle();
@@ -193,10 +198,19 @@ void main() {
         );
         expect(Theme.of(context).brightness, Brightness.dark);
         if (sample.id == 'bottom-sheet') {
-          await tester.ensureVisible(find.text('Open sheet'));
+          await tester.scrollUntilVisible(find.text('Open sheet'), 200);
+          await tester.pumpAndSettle();
           await tester.tap(find.text('Open sheet'));
           await tester.pumpAndSettle();
-          await tester.ensureVisible(find.text('Close sheet'));
+          await tester.scrollUntilVisible(
+            find.text('Close sheet'),
+            100,
+            scrollable: find.descendant(
+              of: find.byType(BottomSheet),
+              matching: find.byType(Scrollable),
+            ),
+          );
+          await tester.pumpAndSettle();
           await tester.tap(find.text('Close sheet'));
           await tester.pumpAndSettle();
         }
