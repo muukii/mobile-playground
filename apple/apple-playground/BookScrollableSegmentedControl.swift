@@ -14,7 +14,11 @@ public struct ScrollableSegmentedControl<Item: Identifiable, Label: View>: View 
   private let items: [Item]
   @Binding private var selection: Item.ID
   private let selectionColor: Color
-  private let label: (Item) -> Label
+  private let selectedForegroundColor: Color
+  private let unselectedForegroundColor: Color
+  private let trackColor: Color
+  private let minimumSegmentHeight: CGFloat
+  private let label: (Item, Bool) -> Label
 
   @Namespace private var selectionNamespace
   @State private var viewportWidth: CGFloat = 0
@@ -26,18 +30,57 @@ public struct ScrollableSegmentedControl<Item: Identifiable, Label: View>: View 
   /// - Parameters:
   ///   - items: The ordered segments, identified independently of their labels.
   ///   - selection: The identifier of the selected item.
-  ///   - selectionColor: The selected capsule's fill. Use a color that contrasts
-  ///     with its white label.
+  ///   - selectionColor: The selected capsule's fill.
+  ///   - selectedForegroundColor: The selected label's default foreground color.
+  ///   - unselectedForegroundColor: The other labels' default foreground color.
+  ///   - trackColor: The fill behind the segments.
+  ///   - minimumSegmentHeight: The minimum height of each segment, in points.
+  ///     Values below 44 are raised to preserve a minimum touch target.
   ///   - label: The content of each segment, usually a `Text` or `Label` view.
   public init(
     items: [Item],
     selection: Binding<Item.ID>,
     selectionColor: Color = .accentColor,
+    selectedForegroundColor: Color = .white,
+    unselectedForegroundColor: Color = .primary,
+    trackColor: Color = Color(uiColor: .secondarySystemFill),
+    minimumSegmentHeight: CGFloat = 44,
     @ViewBuilder label: @escaping (Item) -> Label
+  ) {
+    self.init(
+      items: items,
+      selection: selection,
+      selectionColor: selectionColor,
+      selectedForegroundColor: selectedForegroundColor,
+      unselectedForegroundColor: unselectedForegroundColor,
+      trackColor: trackColor,
+      minimumSegmentHeight: minimumSegmentHeight,
+      label: { item, _ in label(item) }
+    )
+  }
+
+  /// Creates a segmented picker whose labels can react to selection.
+  ///
+  /// The label closure receives the item and whether it is selected. The
+  /// control owns the selection capsule and the button accessibility traits;
+  /// the caller can compose images and text inside each label.
+  public init(
+    items: [Item],
+    selection: Binding<Item.ID>,
+    selectionColor: Color = .accentColor,
+    selectedForegroundColor: Color = .white,
+    unselectedForegroundColor: Color = .primary,
+    trackColor: Color = Color(uiColor: .secondarySystemFill),
+    minimumSegmentHeight: CGFloat = 44,
+    @ViewBuilder label: @escaping (Item, Bool) -> Label
   ) {
     self.items = items
     self._selection = selection
     self.selectionColor = selectionColor
+    self.selectedForegroundColor = selectedForegroundColor
+    self.unselectedForegroundColor = unselectedForegroundColor
+    self.trackColor = trackColor
+    self.minimumSegmentHeight = max(44, minimumSegmentHeight)
     self.label = label
   }
 
@@ -52,18 +95,18 @@ public struct ScrollableSegmentedControl<Item: Identifiable, Label: View>: View 
         ) {
           ForEach(items) { item in
             let isSelected = item.id == selection
-            let foreground: Color = if isSelected { .white } else { .primary }
+            let foreground = isSelected ? selectedForegroundColor : unselectedForegroundColor
             let traits: AccessibilityTraits = if isSelected { .isSelected } else { [] }
 
             Button {
               selection = item.id
             } label: {
-              label(item)
+              label(item, isSelected)
                 .font(.body.weight(.semibold))
                 .lineLimit(1)
                 .fixedSize()
                 .padding(.horizontal, 20)
-                .frame(maxWidth: .infinity, minHeight: 44)
+                .frame(maxWidth: .infinity, minHeight: minimumSegmentHeight)
                 .padding(.vertical, 2)
                 .foregroundStyle(foreground)
                 .background {
@@ -93,7 +136,7 @@ public struct ScrollableSegmentedControl<Item: Identifiable, Label: View>: View 
       .scrollIndicators(.hidden)
       .scrollBounceBehavior(.basedOnSize, axes: .horizontal)
       .fixedSize(horizontal: false, vertical: true)
-      .background(Color(uiColor: .secondarySystemFill), in: Capsule())
+      .background(trackColor, in: Capsule())
       .clipShape(Capsule())
       .onGeometryChange(for: CGFloat.self) { geometry in
         geometry.size.width
@@ -316,6 +359,67 @@ private struct Segment: Identifiable {
   ]
 }
 
+/// Demonstrates a two-tab switcher with a portrait and secondary text.
+private struct ProfileMessageSwitcherExample: View {
+
+  @State private var selection: Tab = .message
+
+  /// Identifies the section selected by the example switcher.
+  private enum Tab: String, CaseIterable, Identifiable {
+    case profile
+    case message
+
+    var id: Self { self }
+  }
+
+  var body: some View {
+    ScrollableSegmentedControl(
+      items: Tab.allCases,
+      selection: $selection,
+      selectionColor: .white,
+      selectedForegroundColor: Color(red: 0.04, green: 0.20, blue: 0.22),
+      unselectedForegroundColor: Color(red: 0.04, green: 0.20, blue: 0.22),
+      trackColor: Color(red: 0.92, green: 0.97, blue: 0.97),
+      minimumSegmentHeight: 64
+    ) { tab, isSelected in
+      switch tab {
+      case .profile:
+        Text("プロフィール")
+          .font(.headline.weight(isSelected ? .bold : .regular))
+      case .message:
+        HStack(spacing: 10) {
+          Image(systemName: "person.fill")
+            .font(.title3)
+            .foregroundStyle(Color(red: 0.43, green: 0.30, blue: 0.26))
+            .frame(width: 40, height: 40)
+            .background(Color(red: 0.98, green: 0.85, blue: 0.78), in: Circle())
+            .accessibilityHidden(true)
+
+          VStack(alignment: .leading, spacing: 2) {
+            Text("メッセージ")
+              .font(.headline.weight(isSelected ? .bold : .regular))
+            Text("けいこ")
+              .font(.caption)
+              .foregroundStyle(Color(red: 0.43, green: 0.56, blue: 0.57))
+          }
+        }
+      }
+    }
+    .shadow(color: .black.opacity(0.08), radius: 12, y: 6)
+    .padding(24)
+    .background(Color(red: 0.94, green: 0.98, blue: 0.98))
+  }
+}
+
+#Preview("Profile and message switcher") {
+  ProfileMessageSwitcherExample()
+}
+
+#Preview("Profile and message switcher - Large text") {
+  ProfileMessageSwitcherExample()
+    .environment(\.dynamicTypeSize, .accessibility3)
+}
+
 #Preview("Scrollable segmented control") {
   ScrollableSegmentedControlBook()
 }
@@ -328,4 +432,13 @@ private struct Segment: Identifiable {
 #Preview("Segmented control - Right to left") {
   ScrollableSegmentedControlBook()
     .environment(\.layoutDirection, .rightToLeft)
+}
+
+private struct _Book: View, Equatable {
+    
+  var body: some View {
+    
+    EmptyView()
+  }
+  
 }
