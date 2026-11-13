@@ -1,2 +1,19 @@
 .DS_Store
 implementation_notes.md
+
+# Xcode user state and local source-control metadata
+xcuserdata/
+*.xcuserstate
+*.xccheckout
+*.xcscmblueprint
+
+# Build outputs and Swift Package Manager caches
+build/
+DerivedData/
+.build/
+.swiftpm/
+
+# Exported archives and debug symbols
+*.xcarchive/
+*.dSYM/
+*.ipa

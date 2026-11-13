@@ -1,16 +1,21 @@
 # Mobile Playground
 
-Small, independently runnable experiments for Apple platforms and Android.
+Small, independently runnable experiments for Apple platforms, Android, and Flutter.
 
 ```text
 mobile-playground/
 ├── apple/
 │   ├── apple-playground.xcodeproj/
 │   └── apple-playground/
-└── android/
-    ├── app/
-    ├── gradle/
-    └── gradlew
+├── android/
+│   ├── app/
+│   ├── gradle/
+│   └── gradlew
+└── flutter/
+    ├── lib/
+    ├── test/
+    ├── ios/
+    └── android/
 ```
 
 ## Apple
@@ -39,9 +44,30 @@ From the repository root, build and run the unit tests with:
 See [the Android README](android/README.md) for SDK setup, sample registration,
 device tests, and screenshots.
 
+## Flutter
+
+Open `flutter/` as the project directory in an IDE with Flutter support.
+The app starts with a catalog of Flutter experiments and runs on iOS and Android.
+
+```sh
+mise trust
+mise run flutter:setup
+mise run flutter:devices
+mise run flutter:run -d <device-id>
+```
+
+Install [mise](https://mise.jdx.dev/getting-started.html) first. The root
+`mise.toml` pins Flutter, so a separate Flutter or Dart installation is not
+required. On macOS, `mise run flutter:setup-ios` also checks Xcode and caches the
+iOS artifacts. Xcode / Simulator runtimes and Android SDK setup remain manual.
+
+See [the Flutter README](flutter/README.md) for SDK setup, sample registration,
+and verification commands. Its `ios/` and `android/` host projects are independent
+of the native playgrounds above.
+
 ## Repository structure
 
-Both platforms share one Git repository and retain their own build systems.
-Platform-specific ignore rules live in `apple/.gitignore` and
-`android/.gitignore`. The original Apple and Android commit histories are
+All playgrounds share one Git repository and retain their own build systems.
+Platform-specific ignore rules live in `apple/.gitignore`, `android/.gitignore`,
+and `flutter/.gitignore`. The original Apple and Android commit histories are
 preserved in this repository.
